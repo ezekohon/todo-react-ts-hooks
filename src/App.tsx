@@ -1,25 +1,40 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useEffect } from 'react';
+import styles from './styles.module.css';
+import axios from 'axios';
+import { HNItem } from './types';
+import { List, ListItem, ListItemText, TextField } from '@material-ui/core';
 
 function App() {
+  const [items, setItems] = useState<HNItem[]>([]);
+  const [query, setQuery] = useState('redux');
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const result = await axios(
+        `https://hn.algolia.com/api/v1/search?query=${query}`,
+      );
+      console.log(result)
+      setItems(result.data.hits);
+    };
+ 
+    fetchData();
+  }, [query]);
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setQuery(event.target.value)
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+    <TextField id="standard-basic" label="Search" value={query} onChange={handleChange}/>
+    <List>
+      {items.map(item => (
+        <ListItem button>
+        <ListItemText primary={item.title} />
+      </ListItem>
+      ))}
+    </List>
+    </>
   );
 }
 
